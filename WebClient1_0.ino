@@ -1,13 +1,10 @@
 #include <SPI.h>
 #include <Ethernet.h>
-#include <PCF8574.h>
-#include <Wire.h>
 #include <LiquidCrystal.h>
 
 #define OUT_PIN_1 0
 #define OUT_PIN_2 1
 #define TEMP_ANALOG_PIN 0
-#define EXPANDER_ADDR 0x20
 #define LCD_TEMPLATE "X X X X X X X X"
 #define SERVER_PORT 3000
 
@@ -17,17 +14,13 @@ byte mac[] = { 0x90, 0xA2, 0xDA, 0x00, 0x41, 0xF0 };
 char serverName[] = "10.0.1.103";
 
 EthernetClient client;
-PCF8574 expander;
 LiquidCrystal lcd(8, 9, 6, 5, 3, 2);
 
 void setup() {
   Serial.begin(9600);
   
-  expander.begin(EXPANDER_ADDR);
-  expander.pinMode(OUT_PIN_1, OUTPUT);
-  expander.pinMode(OUT_PIN_2, OUTPUT);
-  expander.digitalWrite(OUT_PIN_1, HIGH);
-  expander.digitalWrite(OUT_PIN_2, HIGH);
+  pinMode(OUT_PIN_1, OUTPUT);
+  pinMode(OUT_PIN_2, OUTPUT);
   
   lcd.begin(16, 2);
   lcd.setCursor(0, 1);
@@ -95,19 +88,19 @@ void handleSync() {
         if(port == 1) {
           lcd.setCursor(0, 1);
           if(state == 1) {
-            expander.digitalWrite(OUT_PIN_1, LOW);
+            digitalWrite(OUT_PIN_1, HIGH);
             lcd.print("1");
           } else if(state == 0) {
-            expander.digitalWrite(OUT_PIN_1, HIGH);
+            digitalWrite(OUT_PIN_1, LOW);
             lcd.print("0");
           }
         } else if(port == 2) {
           lcd.setCursor(2, 1);
           if(state == 1) {
-            expander.digitalWrite(OUT_PIN_2, LOW);
+            digitalWrite(OUT_PIN_2, HIGH);
             lcd.print("1");
           } else if(state == 0) {
-            expander.digitalWrite(OUT_PIN_2, HIGH);
+            digitalWrite(OUT_PIN_2, LOW);
             lcd.print("0");
           }
         }
