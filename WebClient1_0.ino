@@ -15,6 +15,7 @@
 #define TEMP_RATIO 360
 
 String sensorSerialNumber = "12345";
+String boardSerialNumber = "12345";
 byte mac[] = { 0x90, 0xA2, 0xDA, 0x00, 0x41, 0xF0 };
 char serverName[] = "gentle-planet-1993.heroku.com";
 //char serverName[] = "10.0.1.101";
@@ -81,7 +82,7 @@ void handleSync() {
     Serial.println("connected");
     lcd.setCursor(0, 0);
     lcd.print("syncing ");
-    client.println("GET /boards/sync/12345.xml HTTP/1.0");
+    client.println("GET /boards/sync/" + boardSerialNumber + ".xml HTTP/1.0");
     client.println("Host: " + String(serverName));
     client.println();
 
