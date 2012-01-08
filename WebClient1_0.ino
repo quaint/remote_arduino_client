@@ -9,12 +9,16 @@
 #define TEMP_ANALOG_PIN 0
 #define EXPANDER_ADDR 0x20
 #define LCD_TEMPLATE "X X X X X X X X"
-#define SERVER_PORT 3000
+//#define SERVER_PORT 3000
+#define SERVER_PORT 80
+#define SYNC_DEALY 10
+#define TEMP_RATIO 360
 
 String sensorSerialNumber = "12345";
 byte mac[] = { 0x90, 0xA2, 0xDA, 0x00, 0x41, 0xF0 };
-//char serverName[] = "gentle-planet-1993.heroku.com";
-char serverName[] = "10.0.1.103";
+char serverName[] = "gentle-planet-1993.heroku.com";
+//char serverName[] = "10.0.1.101";
+int tempRatioCounter = 0;
 
 EthernetClient client;
 PCF8574 expander;
@@ -33,7 +37,7 @@ void setup() {
   lcd.setCursor(0, 1);
   lcd.print(LCD_TEMPLATE);
   
-	if (Ethernet.begin(mac) == 0) {
+  if (Ethernet.begin(mac) == 0) {
     Serial.println("failed to configure Ethernet using DHCP");
     while(true);
   }
@@ -53,15 +57,15 @@ void setup() {
 
 void loop()
 {
-	handleSync();
-	handleTemp();
-	handleCountdown();
+  handleSync();
+  handleTemp();
+  handleCountdown();
 }
 
 void handleCountdown() {
-	lcd.setCursor(0, 0);
+  lcd.setCursor(0, 0);
   lcd.print("t-        ");
-  for(int i=10; i>0; i--) {
+  for(int i=SYNC_DEALY; i>0; i--) {
     lcd.setCursor(2, 0);
     lcd.print(i);
     if(i<10) {
@@ -73,9 +77,9 @@ void handleCountdown() {
 }
 
 void handleSync() {
-	if (client.connect(serverName, SERVER_PORT) > 0) {
+  if (client.connect(serverName, SERVER_PORT) > 0) {
     Serial.println("connected");
-		lcd.setCursor(0, 0);
+    lcd.setCursor(0, 0);
     lcd.print("syncing ");
     client.println("GET /boards/sync/12345.xml HTTP/1.0");
     client.println("Host: " + String(serverName));
@@ -116,27 +120,29 @@ void handleSync() {
     client.stop();
     client.flush();
   } else {
-	  Serial.println("not connected when syncing"); 
-	}
+    Serial.println("not connected when syncing"); 
+  }
 }
 
 void handleTemp() {
-	  float temp = readTemp();
-    lcd.setCursor(10, 0);
-    lcd.print(temp);
-    Serial.print("temp: ");
-    Serial.println(temp);
-    
+  float temp = readTemp();
+  lcd.setCursor(10, 0);
+  lcd.print(temp);
+  Serial.print("temp: ");
+  Serial.println(temp);
+  
+  if(tempRatioCounter >= TEMP_RATIO) {
+    tempRatioCounter = 0;
     String parValue = "value=";
     String parSerial = "&serial=" + sensorSerialNumber;
-    
+      
     Serial.println("sending temp");
     lcd.setCursor(0, 0);
     lcd.print("sending   ");
     if (client.connect(serverName, SERVER_PORT) > 0) {
       client.println("POST /readings/upload HTTP/1.0");
       client.println("Content-Type: application/x-www-form-urlencoded");
-			client.println("Host: " + String(serverName));
+      client.println("Host: " + String(serverName));
       client.print("Content-Length: ");
       client.println(parValue.length() + parSerial.length() + sizeof(temp) + 1);
       client.println();
@@ -152,6 +158,9 @@ void handleTemp() {
     } else {
       Serial.println("not connected when sending"); 
     }
+  } else {
+    tempRatioCounter++;
+  }
 }
 
 float readTemp() {
