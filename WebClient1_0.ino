@@ -103,27 +103,39 @@ void handleSync() {
 //       if(port > 2) {
 //         break;
 //       }
-      if(client.find("<state>")) {
-        int state = client.parseInt();
-        Serial.print("state: ");
-        Serial.println(state);
-        if(port == 1) {
-          lcd.setCursor(0, 1);
-          if(state == 1) {
-            expander.digitalWrite(OUT_PIN_1, HIGH);
-            lcd.print("1");
-          } else if(state == 0) {
-            expander.digitalWrite(OUT_PIN_1, LOW);
-            lcd.print("0");
+      if(client.find("<kind>")) {
+        int kind = client.parseInt();
+        if(kind == 1) {
+          if(client.find("<state>")) {
+            int state = client.parseInt();
+            Serial.print("state: ");
+            Serial.println(state);
+            if(port == 1) {
+              lcd.setCursor(0, 1);
+              if(state == 1) {
+                expander.digitalWrite(OUT_PIN_1, HIGH);
+                lcd.print("1");
+              } else if(state == 0) {
+                expander.digitalWrite(OUT_PIN_1, LOW);
+                lcd.print("0");
+              }
+            } else if(port == 2) {
+              lcd.setCursor(2, 1);
+              if(state == 1) {
+                expander.digitalWrite(OUT_PIN_2, HIGH);
+                lcd.print("1");
+              } else if(state == 0) {
+                expander.digitalWrite(OUT_PIN_2, LOW);
+                lcd.print("0");
+              }
+            }
           }
-        } else if(port == 2) {
-          lcd.setCursor(2, 1);
-          if(state == 1) {
-            expander.digitalWrite(OUT_PIN_2, HIGH);
-            lcd.print("1");
-          } else if(state == 0) {
-            expander.digitalWrite(OUT_PIN_2, LOW);
-            lcd.print("0");
+        } else if(kind == 2) {
+          if(client.find("<setting>")) {
+            int setting = client.parseInt();
+            Serial.print("setting: ");
+            Serial.println(setting);
+            servo.write(setting);
           }
         }
       }
