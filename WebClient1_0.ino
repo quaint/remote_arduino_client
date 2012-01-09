@@ -31,8 +31,8 @@ void setup() {
   expander.begin(EXPANDER_ADDR);
   expander.pinMode(OUT_PIN_1, OUTPUT);
   expander.pinMode(OUT_PIN_2, OUTPUT);
-  expander.digitalWrite(OUT_PIN_1, HIGH);
-  expander.digitalWrite(OUT_PIN_2, HIGH);
+  expander.digitalWrite(OUT_PIN_1, LOW);
+  expander.digitalWrite(OUT_PIN_2, LOW);
   
   lcd.begin(16, 2);
   lcd.setCursor(0, 1);
@@ -100,19 +100,19 @@ void handleSync() {
         if(port == 1) {
           lcd.setCursor(0, 1);
           if(state == 1) {
-            expander.digitalWrite(OUT_PIN_1, LOW);
+            expander.digitalWrite(OUT_PIN_1, HIGH);
             lcd.print("1");
           } else if(state == 0) {
-            expander.digitalWrite(OUT_PIN_1, HIGH);
+            expander.digitalWrite(OUT_PIN_1, LOW);
             lcd.print("0");
           }
         } else if(port == 2) {
           lcd.setCursor(2, 1);
           if(state == 1) {
-            expander.digitalWrite(OUT_PIN_2, LOW);
+            expander.digitalWrite(OUT_PIN_2, HIGH);
             lcd.print("1");
           } else if(state == 0) {
-            expander.digitalWrite(OUT_PIN_2, HIGH);
+            expander.digitalWrite(OUT_PIN_2, LOW);
             lcd.print("0");
           }
         }
